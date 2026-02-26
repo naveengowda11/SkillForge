@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkillForge AI Dashboard</title>
+
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+/* Your existing dashboard styles remain unchanged */
+.dashboard-body {
+  display: flex;
+  height: 100vh;
+  background: radial-gradient(circle at top left,#0f172a,#020617);
+  color: white;
+  overflow: hidden;
+}
+.sidebar { width: 240px; background: #0f172a; padding: 25px 15px; border-right: 1px solid rgba(255,255,255,0.05); }
+.sidebar .logo { font-size: 20px; font-weight: 700; color: #60a5fa; margin-bottom: 30px; }
+.nav-item { padding: 12px; border-radius: 10px; margin-bottom: 10px; cursor: pointer; color: #cbd5e1; transition: 0.3s; }
+.nav-item:hover, .nav-item.active { background: rgba(96,165,250,0.15); color: #fff; }
+.main { flex: 1; padding: 30px; overflow-y: auto; }
+.topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+.logout-btn { background: linear-gradient(90deg,#ef4444,#f87171); border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; color: white; }
+.section { display: none; }
+.section.active { display: block; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 20px; }
+.card { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.05); }
+.progress-bar { height: 8px; background: #1e293b; border-radius: 5px; margin-top: 10px; }
+.progress-fill { height: 100%; width: 72%; background: #60a5fa; border-radius: 5px; }
+.chart-container { max-width: 400px; margin-top: 20px; }
+</style>
+</head>
+
+<body class="dashboard-body">
+
+<div class="sidebar">
+  <div class="logo">SkillForge</div>
+  <div class="nav-item active" onclick="showSection(event,'dashboard')">Dashboard</div>
+  <div class="nav-item" onclick="showSection(event,'courses')">Courses</div>
+  <div class="nav-item" onclick="showSection(event,'tests')">Adaptive Tests</div>
+  <div class="nav-item" onclick="showSection(event,'performance')">Performance</div>
+  <div class="nav-item" onclick="showSection(event,'settings')">Settings</div>
+</div>
+
+<div class="main">
+
+  <div class="topbar">
+    <h2 id="welcomeText">Welcome 👋</h2>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+
+  <div id="dashboard" class="section active">
+    <div class="grid">
+      <div class="card"><h3>Enrolled Course</h3><p>AI Fundamentals</p></div>
+      <div class="card"><h3>Progress</h3><div class="progress-bar"><div class="progress-fill"></div></div></div>
+      <div class="card"><h3>Next Test</h3><p>Available Now</p></div>
+    </div>
+  </div>
+
+  <div id="courses" class="section">
+    <div class="card"><h3>AI Fundamentals</h3><p>Beginner → Advanced AI Mastery</p></div>
+  </div>
+
+  <div id="tests" class="section">
+    <div class="card"><h3>Adaptive Test</h3><button class="primary-btn" style="margin-top:10px;">Start Test</button></div>
+  </div>
+
+  <div id="performance" class="section">
+    <h3>Your Skill Radar</h3>
+    <div class="chart-container">
+      <canvas id="performanceChart"></canvas>
+    </div>
+  </div>
+
+  <div id="settings" class="section">
+    <div class="card">
+      <p><strong>Name:</strong> <span id="userName"></span></p>
+      <p><strong>Email:</strong> <span id="userEmail"></span></p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+
+/* ✅ HANDLE GOOGLE REDIRECT */
+const params = new URLSearchParams(window.location.search);
+
+if(params.get("token")){
+  localStorage.setItem("token", params.get("token"));
+  localStorage.setItem("name", params.get("name"));
+  localStorage.setItem("email", params.get("email"));
+  window.history.replaceState({}, document.title, "dashboard.html");
+}
+
+/* ✅ LOAD USER */
+function loadUser(){
+  const token = localStorage.getItem("token");
+
+  if(!token){
+    window.location.href = "login.html";
+    return;
+  }
+
+  const name = localStorage.getItem("name");
+  const email = localStorage.getItem("email");
+
+  if(name){
+    document.getElementById("welcomeText").innerText =
+      "Welcome, " + name + " 👋";
+    document.getElementById("userName").innerText = name;
+  }
+
+  if(email){
+    document.getElementById("userEmail").innerText = email;
+  }
+}
+
+loadUser();
+
+/* NAVIGATION */
+function showSection(event,id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+/* LOGOUT */
+function logout(){
+  localStorage.clear();
+  window.location.href="index.html";
+}
+
+/* CHART */
+new Chart(document.getElementById('performanceChart'),{
+  type:'radar',
+  data:{
+    labels:['ML','DL','NLP','Math','Coding'],
+    datasets:[{
+      label:'Skill Level',
+      data:[75,60,70,65,80],
+      borderColor:'#60a5fa',
+      backgroundColor:'rgba(96,165,250,0.2)'
+    }]
+  }
+});
+</script>
+
+</body>
+</html>

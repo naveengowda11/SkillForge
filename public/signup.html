@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sign Up - SkillForge</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="auth-body">
+
+  <div class="auth-wrapper">
+    <div class="auth-card">
+
+      <h2>Create Account</h2>
+      <p class="auth-sub">Start your adaptive AI journey today</p>
+
+      <form class="auth-form">
+        <input type="text" id="name" placeholder="Full Name" required>
+        <input type="email" id="email" placeholder="Email Address" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+
+        <!-- OTP SECTION (Hidden Initially) -->
+        <div id="otpSection" style="display:none;">
+          <input type="text" id="otpInput" placeholder="Enter OTP" required>
+          <button type="button" class="primary-btn full-btn" onclick="verifyOTP()">
+            Verify OTP
+          </button>
+        </div>
+
+        <button type="button" id="sendOtpBtn" class="primary-btn full-btn" onclick="sendOTP()">
+          Send OTP
+        </button>
+
+        <button type="submit" id="registerBtn" class="primary-btn full-btn" style="display:none;">
+          Register
+        </button>
+
+      </form>
+
+      <p class="auth-link">
+        Already have an account?
+        <a href="login.html">Login</a>
+      </p>
+
+    </div>
+  </div>
+
+<script>
+
+async function sendOTP() {
+  const email = document.getElementById("email").value;
+
+  if (!email) {
+    alert("Please enter email first");
+    return;
+  }
+
+  const res = await fetch("http://localhost:5000/api/send-otp", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email })
+  });
+
+  const data = await res.json();
+
+  if (res.ok) {
+    alert("OTP sent to your email");
+    document.getElementById("otpSection").style.display = "block";
+  } else {
+    alert(data.message);
+  }
+}
+
+async function verifyOTP() {
+  const email = document.getElementById("email").value;
+  const otp = document.getElementById("otpInput").value;
+
+  const res = await fetch("http://localhost:5000/api/verify-otp", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, otp })
+  });
+
+  const data = await res.json();
+
+  if (res.ok && data.verified) {
+    alert("OTP Verified Successfully");
+    document.getElementById("sendOtpBtn").style.display = "none";
+    document.getElementById("otpSection").style.display = "none";
+    document.getElementById("registerBtn").style.display = "block";
+  } else {
+    alert("Invalid OTP");
+  }
+}
+
+const form = document.querySelector(".auth-form");
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const name = document.getElementById("name").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const confirmPassword = document.getElementById("confirmPassword").value;
+
+  if (password !== confirmPassword) {
+    alert("Passwords do not match");
+    return;
+  }
+
+  const res = await fetch("http://localhost:5000/api/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, password })
+  });
+
+  const data = await res.json();
+
+  if (res.ok) {
+    alert("Registration successful!");
+    window.location.href = "login.html";
+  } else {
+    alert(data.message);
+  }
+});
+
+</script>
+
+</body>
+</html>
